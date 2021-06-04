@@ -10,6 +10,10 @@ Retrieve data for list of orders in Starshipit
 - `ETLFunctions.py`   - Contains all functions
 - `StarshipitAPI.cfg` - Config file for Starshipit API access keys
 
+## Functions purpose
+
+- Please see comments within functions in `ETLFunctions.py`
+
 ## Note
 
 - Developed in Google Colab
