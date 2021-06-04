@@ -3,7 +3,7 @@ Retrieve data for list of orders in Starshipit
 
 ## Objective
 
-> Retrieve Starshipit data per order
+> Retrieve Starshipit data per order number
 
 ## Files/Folder in Repository
 
