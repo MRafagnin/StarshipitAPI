@@ -1,8 +1,8 @@
-def StarshipitAPI(AccountName):
+def StarshipitAPI(sectionName):
     
-    '''
+    """
         Return Starshipit account API and Subscription key from CFG file
-    '''
+    """
 
     import configparser
 
@@ -14,8 +14,8 @@ def StarshipitAPI(AccountName):
 
     try:
         # Assignes value to variable via the config file
-        StarShipIT_Api_Key        = config['StarshipitAPI'][AccountName].split("|")[0]
-        Ocp_Apim_Subscription_Key = config['StarshipitAPI'][AccountName].split("|")[1]
+        StarShipIT_Api_Key        = config[sectionName]['apiKey']
+        Ocp_Apim_Subscription_Key = config[sectionName]['subsKey']
     except:
         # Return 'None' to variable and message if incorrect value is provided
         StarShipIT_Api_Key        = None
@@ -24,28 +24,19 @@ def StarshipitAPI(AccountName):
     
     return StarShipIT_Api_Key, Ocp_Apim_Subscription_Key
 
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-def CreateInputOrdersSet():
-    
-    '''
-        Creates Set from input Order numbers
-    '''
+# ----------------------------------------------------------------
+# ----------------------------------------------------------------
+def CFGFileSectionNameToList():
 
-    OrderNoInput = input()
-    OrderNoSet = set(OrderNoInput.split(' '))
-
-    return OrderNoSet
-
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-def CFGFileKeyValuesToList():
-
-    '''
-        Creates a list from CFG file key values
-    '''
+    """
+        Creates a list from CFG file section names
+    """
 
     import configparser
+    import os
+        
+    # Set directory to access 'StarshipitAPI.cfg'
+    os.chdir('/content/gdrive/My Drive/PROJECTS/Colab_Notebooks/Unleashed SO Posting/2nd Stage - ETL/')
 
     # Defines object
     config = configparser.ConfigParser()
@@ -54,32 +45,32 @@ def CFGFileKeyValuesToList():
     # Reads config file
     config.read('StarshipitAPI.cfg')
 
-    # Creates list from key values
-    KeysList = list(config._sections['StarshipitAPI'].keys())
+    # Creates list from section names
+    sectionsList = config.sections()
 
-    return KeysList
+    return sectionsList
 
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-def RetrieveStarshipitData(OrderNumber):
+# ----------------------------------------------------------------
+# ----------------------------------------------------------------
+def ConfirmsStarshipitAccount(orderNumber):
 
-    '''
-        - Iterates orders through Starshipit Accounts to find data
-        - Retrieve order data from Starshipit by order number
-        - Updates ['sender_details']['company'] with Account Name
-    '''
+    """
+        Confirms Starshipit account by order number
+
+        Return: Starshipit Account Name
+    """
 
     import http.client, urllib.request, urllib.parse, urllib.error, base64
     import json
 
     # Creates list from CFG file key values
-    StarshipitAccounts = CFGFileKeyValuesToList()
+    StarshipitAccounts = CFGFileSectionNameToList()
 
     for AccountName in StarshipitAccounts:
 
         # Request parameters
         params = urllib.parse.urlencode({
-                                        'order_number': OrderNumber,
+                                        'order_number': orderNumber,
                                         })
 
 
@@ -102,37 +93,6 @@ def RetrieveStarshipitData(OrderNumber):
 
         if StarshipitOrderData['success'] == True:
 
-            StarshipitOrderData['order']['sender_details']['company'] = AccountName
-
             break
     
-    return StarshipitOrderData
-
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
-def CreateStarshipitOrderDict(OrderNoSet):
-    
-    '''
-        - Loop through OrderNo Set
-        - Retrieve Order data from Starshipit
-        - Adds data to dictionary 
-    '''
-
-    from progressbar import ProgressBar
-
-    pbar = ProgressBar()
-
-    StarshipitOrderDict = {}
-
-    for OrderNumber in pbar(OrderNoSet):
-
-        # Retrieve order data from Starshipit
-        StarshipitOrderData = RetrieveStarshipitData(OrderNumber)
-
-        # Adds data to dictionary
-        StarshipitOrderDict[OrderNumber] = StarshipitOrderData
-    
-    return StarshipitOrderDict
-
-# ------------------------------------------------------------------
-# ------------------------------------------------------------------
+    return AccountName
